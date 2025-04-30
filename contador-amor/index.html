@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Contador do Amor 💙</title>
+  <style>
+    :root {
+      --main-color: #193266;      /* Tom principal: azul escuro */
+      --light-bg: #e9eff7;        /* Fundo da página: tom claro derivado do principal */
+      --countdown-bg: #dfe6f9;    /* Fundo do contador: tom suave e agradável */
+    }
+    
+    body {
+      background: var(--light-bg);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      font-family: Arial, sans-serif;
+      padding: 20px;
+      text-align: center;
+    }
+    
+    h1 {
+      color: var(--main-color);
+    }
+    
+    #countdown {
+      font-size: 2.5em;
+      color: var(--main-color);
+      margin: 30px 0;
+      text-shadow: 1px 1px 2px rgba(25, 50, 102, 0.1);
+      background: var(--countdown-bg);
+      padding: 10px 20px;
+      border-radius: 10px;
+    }
+    
+    .couple-container {
+      width: 90%;
+      max-width: 800px;
+      height: 250px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      position: relative;
+    }
+    
+    .character {
+      width: 150px;
+      height: 200px;
+      background-size: contain;
+      background-repeat: no-repeat;
+      transition: transform 1s ease-in-out;
+    }
+    
+    /* Homem à esquerda e Mulher à direita */
+    #male {
+      background-image: url('imagens/homem.png');
+    }
+    
+    #female {
+      background-image: url('imagens/mulher.png');
+    }
+    
+    #heart {
+      font-size: 4em;
+      position: absolute;
+      left: 50%;
+      transform: translateX(-50%);
+      opacity: 0.7;
+      animation: pulse 2s infinite ease-in-out;
+      filter: drop-shadow(0 0 10px rgba(25, 50, 102, 0.5));
+    }
+    
+    @keyframes pulse {
+      0%, 100% { transform: translateX(-50%) scale(1); }
+      50% { transform: translateX(-50%) scale(1.2); }
+    }
+    
+    @media (max-width: 600px) {
+      .character {
+        width: 100px;
+        height: 150px;
+      }
+      #heart {
+        font-size: 3em;
+      }
+      #countdown {
+        font-size: 2em;
+      }
+    }
+  </style>
+</head>
+<body>
+  <h1>Faltam Apenas...</h1>
+  <div id="countdown">Carregando...</div>
+  <div class="couple-container">
+    <!-- Homem à esquerda -->
+    <div class="character" id="male"></div>
+    <div id="heart">💙</div>
+    <!-- Mulher à direita -->
+    <div class="character" id="female"></div>
+  </div>
+  <script>
+    // Configurações:
+    const targetDate = new Date('2025-08-28T10:00:00').getTime();
+    const totalCountdownMs = 120 * 24 * 3600 * 1000; // 120 dias em ms
+    const designatedMaxTranslation = 150;            // Deslocamento padrão até 2h do fim
+    const finalDesiredTranslation = 250;             // Deslocamento final quando o contador chegar a 0
+    const twoHoursMs = 2 * 3600 * 1000;                // 2 horas em ms
+
+    function atualizarContador() {
+      const agora = new Date().getTime();
+      const diferenca = targetDate - agora;
+
+      // Se a data já passou, posiciona os bonecos no local final e oculta o título.
+      if (diferenca <= 0) {
+        document.getElementById('countdown').innerHTML = "Já estamos juntos! 💙";
+        document.getElementById('male').style.transform = `translateX(${finalDesiredTranslation}px)`;
+        document.getElementById('female').style.transform = `translateX(-${finalDesiredTranslation}px)`;
+        document.getElementById('heart').style.opacity = '1';
+        document.querySelector('h1').style.display = 'none';
+        return;
+      }
+
+      // Atualiza o contador
+      const dias = Math.floor(diferenca / (1000 * 60 * 60 * 24));
+      const horas = Math.floor((diferenca % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+      const minutos = Math.floor((diferenca % (1000 * 60 * 60)) / (1000 * 60));
+      const segundos = Math.floor((diferenca % (1000 * 60)) / 1000);
+      document.getElementById('countdown').innerHTML = 
+          `${dias} Dias ${horas}h ${minutos}m ${segundos}s`;
+
+      // Cálculo do progresso (0 a 1) nos 120 dias:
+      let progress = 1 - (diferenca / totalCountdownMs);
+      progress = Math.max(0, Math.min(progress, 1));
+      let translation = designatedMaxTranslation * progress;
+
+      // Aproximação extra nos últimos 2h:
+      if (diferenca < twoHoursMs) {
+        const extraProgress = 1 - (diferenca / twoHoursMs);
+        translation = designatedMaxTranslation + extraProgress * (finalDesiredTranslation - designatedMaxTranslation);
+      }
+      
+      // Aplica as transformações dos personagens:
+      document.getElementById('male').style.transform = `translateX(${translation}px)`;
+      document.getElementById('female').style.transform = `translateX(-${translation}px)`;
+
+      // Ajuste na opacidade do coração:
+      let heartOpacity = 0.7;
+      if (diferenca < twoHoursMs) {
+        const extraProgress = 1 - (diferenca / twoHoursMs);
+        heartOpacity = 0.7 + extraProgress * 0.3;
+      }
+      document.getElementById('heart').style.opacity = heartOpacity;
+    }
+    
+    setInterval(atualizarContador, 1000);
+    atualizarContador();
+  </script>
+</body>
+</html>
