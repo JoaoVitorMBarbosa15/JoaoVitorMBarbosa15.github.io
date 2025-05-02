@@ -1,0 +1,39 @@
+name: Build Jekyll Site
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main  # Substitua por sua branch principal, se necessário
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      # Fazer checkout do repositório
+      - name: Checkout Code
+        uses: actions/checkout@v3
+
+      # Configurar o Ruby para rodar o Jekyll
+      - name: Setup Ruby
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: '3.0' # Versão recomendada para Jekyll
+
+      # Instalar dependências do Jekyll
+      - name: Install Jekyll and Bundler
+        run: |
+          gem install bundler
+          bundle install
+
+      # Executar o Jekyll Build
+      - name: Build Jekyll Site
+        run: bundle exec jekyll build
+
+      # Publicar no GitHub Pages
+      - name: Deploy to GitHub Pages
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./_site
